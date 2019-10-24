@@ -1,6 +1,6 @@
 {
   "name": "svpng",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts SVGs to PNGs",
   "author": "Tyler Peterson <tylerjpeterson@gmail.com>",
   "main": "index.js",
