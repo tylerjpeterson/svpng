@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: ["error", { "caughtErrors": "none" }] */
 'use strict';
 
 const path = require('path');
@@ -86,7 +87,7 @@ const convertSvgToPng = async (src, dest, options) => {
 	try {
 		// Attempt to get the SVG's dimensions
 		info = size(src);
-	} catch (err) {
+	} catch (error) {
 		// If size cannot be determined, force trim option
 		options.trim = true;
 	}

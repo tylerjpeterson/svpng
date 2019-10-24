@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: ["error", { "caughtErrors": "none" }] */
 'use strict';
 
 const path = require('path');
@@ -19,81 +20,88 @@ tape('Module exports a function.', test => {
 	test.end();
 });
 
-tape('Module generates a PNG file at dest.', test => {
+tape('Module generates a PNG file at dest.', async test => {
 	const out = path.join(TMP, '1.png');
-	test.plan(1);
 
-	convert(SVG, out, {overwrite: true})
-		.then(() => test.equal(fs.existsSync(out), true, 'PNG saved to dest.'))
-		.catch(() => test.fail('PNG not saved at dest.'));
+	try {
+		await convert(SVG, out, {overwrite: true});
+		test.equal(fs.existsSync(out), true, 'PNG saved to dest.');
+		test.end();
+	} catch (error) {
+		test.fail('PNG not saved at dest.');
+	}
 });
 
-tape('Should throw when invalid svg is passed.', test => {
+tape('Should throw when invalid svg is passed.', async test => {
 	const out = path.join(TMP, '1.png');
-	test.plan(1);
 
-	convert(NO_SVG, out)
-		.then(() => test.fail('Did not throw error.'))
-		.catch(() => test.pass('Invalid SVG error thrown.'));
+	try {
+		await convert(NO_SVG, out);
+		test.fail('Did not throw error.');
+	} catch (error) {
+		test.pass('Invalid SVG error thrown.');
+		test.end();
+	}
 });
 
-tape('Should not overwrite file unless told to.', test => {
-	const out = path.join(TMP, '1.png');
-	const oldTime = fs.statSync(out).mtimeMs;
-
-	convert(SVG, out)
-		.then(() => {
-			test.fail('Did not throw error.');
-			test.end();
-		})
-		.catch(() => {
-			test.equal(fs.statSync(out).mtimeMs, oldTime, 'PNG was not overwritten.');
-			test.pass('Overwrite error thrown.');
-			test.end();
-		});
-});
-
-tape('Should overwrite file when told to.', test => {
+tape('Should not overwrite file unless told to.', async test => {
 	const out = path.join(TMP, '1.png');
 	const oldTime = fs.statSync(out).mtimeMs;
 
-	convert(SVG, out, {overwrite: true})
-		.then(() => {
-			test.equal(fs.existsSync(out), true, 'PNG overwrote file saved to dest.');
-			test.notEqual(fs.statSync(out).mtimeMs, oldTime, 'PNG overwrote older file.');
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out);
+		test.fail('Did not throw error.');
+	} catch (error) {
+		test.equal(fs.statSync(out).mtimeMs, oldTime, 'PNG was not overwritten.');
+		test.pass('Overwrite error thrown.');
+		test.end();
+	}
 });
 
-tape('Should render file based on SVG dimensions.', test => {
+tape('Should overwrite file when told to.', async test => {
+	const out = path.join(TMP, '1.png');
+	const oldTime = fs.statSync(out).mtimeMs;
+
+	try {
+		await convert(SVG, out, {overwrite: true});
+		test.equal(fs.existsSync(out), true, 'PNG overwrote file saved to dest.');
+		test.notEqual(fs.statSync(out).mtimeMs, oldTime, 'PNG overwrote older file.');
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
+});
+
+tape('Should render file based on SVG dimensions.', async test => {
 	const out = path.join(TMP, '1.png');
 	const srcDims = size(SVG);
 
-	convert(SVG, out, {overwrite: true})
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.width, srcDims.width, `PNG width matches raw SVG width (${outDims.width}px).`);
-			test.equal(outDims.height, srcDims.height, `PNG height matches raw SVG height (${outDims.height}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out, {overwrite: true});
+		const outDims = size(out);
+		test.equal(outDims.width, srcDims.width, `PNG width matches raw SVG width (${outDims.width}px).`);
+		test.equal(outDims.height, srcDims.height, `PNG height matches raw SVG height (${outDims.height}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render file based on options.', test => {
+tape('Should render file based on options.', async test => {
 	const out = path.join(TMP, '1.png');
 
-	convert(SVG, out, {width: 1200, overwrite: true})
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.width, 1200, `PNG width matches width option (${outDims.width}px).`);
-			test.equal(outDims.height, 1200, `PNG height scales based on width (${outDims.height}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out, {width: 1200, overwrite: true});
+		const outDims = size(out);
+		test.equal(outDims.width, 1200, `PNG width matches width option (${outDims.width}px).`);
+		test.equal(outDims.height, 1200, `PNG height scales based on width (${outDims.height}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render file based on options without skewing height.', test => {
+tape('Should render file based on options without skewing height.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
@@ -102,17 +110,18 @@ tape('Should render file based on options without skewing height.', test => {
 		overwrite: true
 	};
 
-	convert(SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.width, 1200, `PNG width matches width option without skewing (${outDims.width}px).`);
-			test.equal(outDims.height, 500, `PNG height matches width option without skewing (${outDims.height}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out, opts);
+		const outDims = size(out);
+		test.equal(outDims.width, 1200, `PNG width matches width option without skewing (${outDims.width}px).`);
+		test.equal(outDims.height, 500, `PNG height matches width option without skewing (${outDims.height}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render file based on options without skewing width.', test => {
+tape('Should render file based on options without skewing width.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
@@ -121,17 +130,18 @@ tape('Should render file based on options without skewing width.', test => {
 		overwrite: true
 	};
 
-	convert(SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.height, 1200, `PNG height matches height option without skewing (${outDims.height}px).`);
-			test.equal(outDims.width, 500, `PNG width matches height option without skewing (${outDims.width}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out, opts);
+		const outDims = size(out);
+		test.equal(outDims.height, 1200, `PNG height matches height option without skewing (${outDims.height}px).`);
+		test.equal(outDims.width, 500, `PNG width matches height option without skewing (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render a trimmed file without changing dimensions.', test => {
+tape('Should render a trimmed file without changing dimensions.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
@@ -141,17 +151,18 @@ tape('Should render a trimmed file without changing dimensions.', test => {
 		overwrite: true
 	};
 
-	convert(SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.height, 500, `PNG height matches height option without skewing (${outDims.height}px).`);
-			test.equal(outDims.width, 500, `PNG width matches height option without skewing (${outDims.width}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(SVG, out, opts);
+		const outDims = size(out);
+		test.equal(outDims.height, 500, `PNG height matches height option without skewing (${outDims.height}px).`);
+		test.equal(outDims.width, 500, `PNG width matches height option without skewing (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render an invalid SVG to size based on options and trim.', test => {
+tape('Should render an invalid SVG to size based on options and trim.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
@@ -160,34 +171,36 @@ tape('Should render an invalid SVG to size based on options and trim.', test => 
 		overwrite: true
 	};
 
-	convert(INVALID_SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(outDims.height, 500, `PNG height matches height option (${outDims.height}px).`);
-			test.equal(outDims.width, 500, `PNG width matches height option (${outDims.width}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(INVALID_SVG, out, opts);
+		const outDims = size(out);
+		test.equal(outDims.height, 500, `PNG height matches height option (${outDims.height}px).`);
+		test.equal(outDims.width, 500, `PNG width matches height option (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render an invalid SVG to default size.', test => {
+tape('Should render an invalid SVG to default size.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
 		overwrite: true
 	};
 
-	convert(INVALID_SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(convert.DEFAULTS.defaultSvgLength, outDims.height, `PNG height matches defaultSvgLength (${outDims.height}px).`);
-			test.equal(convert.DEFAULTS.defaultSvgLength, outDims.width, `PNG width matches defaultSvgLength (${outDims.width}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(INVALID_SVG, out, opts);
+		const outDims = size(out);
+		test.equal(convert.DEFAULTS.defaultSvgLength, outDims.height, `PNG height matches defaultSvgLength (${outDims.height}px).`);
+		test.equal(convert.DEFAULTS.defaultSvgLength, outDims.width, `PNG width matches defaultSvgLength (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });
 
-tape('Should render an invalid SVG to default size as set as defaultSvgLength option.', test => {
+tape('Should render an invalid SVG to default size as set as defaultSvgLength option.', async test => {
 	const out = path.join(TMP, '1.png');
 
 	const opts = {
@@ -195,12 +208,13 @@ tape('Should render an invalid SVG to default size as set as defaultSvgLength op
 		overwrite: true
 	};
 
-	convert(INVALID_SVG, out, opts)
-		.then(() => {
-			const outDims = size(out);
-			test.equal(500, outDims.height, `PNG height matches options.defaultSvgLength (${outDims.height}px).`);
-			test.equal(500, outDims.width, `PNG width matches options.defaultSvgLength (${outDims.width}px).`);
-			test.end();
-		})
-		.catch(() => test.fail('PNG not overwritten at dest.'));
+	try {
+		await convert(INVALID_SVG, out, opts);
+		const outDims = size(out);
+		test.equal(500, outDims.height, `PNG height matches options.defaultSvgLength (${outDims.height}px).`);
+		test.equal(500, outDims.width, `PNG width matches options.defaultSvgLength (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
 });

@@ -30,8 +30,9 @@ program
 
 		try {
 			await convert(source, dest, options);
-		} catch (err) {
-			console.error(err.message || err);
+		} catch (error) {
+			console.error(error);
+			process.exit(1);
 		}
 
 		console.log(`PNG written to "${dest}" in ${process.hrtime(hrstart)[1] / 1000000000}s`);
