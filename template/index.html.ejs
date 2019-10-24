@@ -4,8 +4,9 @@
 	<meta charset="utf-8">
 	<title></title>
 	<style>
-		html, body { margin: 0; padding: 0; background-color: transparent; }
-		svg { display: block; position: absolute; top: 0; left: 0; }
+		html, body { margin: 0; padding: 0; background-color: <%- backgroundColor ? backgroundColor : 'transparent'; %>; }
+		body { padding: <%- padding > 0 ? `${padding}px` : 0; %>; }
+		svg { display: block; position: relative; top: 0; left: 0; }
 	</style>
 </head>
 <body>

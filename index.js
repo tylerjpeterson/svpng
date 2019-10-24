@@ -65,6 +65,11 @@ const convertSvgToPng = async (src, dest, options) => {
 		...options
 	};
 
+	// Force omitBackground to false if backgroundColor is set
+	if (options.backgroundColor) {
+		options.omitBackground = false;
+	}
+
 	// Confirm source file exists
 	if (!fs.existsSync(src)) {
 		throw new Error(`SVG file not found at "${src}".`);
@@ -99,7 +104,11 @@ const convertSvgToPng = async (src, dest, options) => {
 	const {data} = await svgo.optimize(svg, {path: src});
 
 	// Create an HTML page with the SVG embedded
-	const markup = render({svg: data});
+	const markup = render({
+		svg: data,
+		padding: options.padding,
+		backgroundColor: options.backgroundColor
+	});
 
 	// Launch a puppeteer instance
 	const browser = await puppeteer.launch();
@@ -121,6 +130,12 @@ const convertSvgToPng = async (src, dest, options) => {
 		height = height || info.height;
 	}
 
+	// If the image is padded, reduce size of SVG
+	if (options.padding > 0) {
+		width -= (options.padding * 2);
+		height -= (options.padding * 2);
+	}
+
 	// Retrieve rendered SVG dimensions according to
 	// browser after optionally trimming SVG, and setting
 	// desired dimensions
@@ -129,8 +144,8 @@ const convertSvgToPng = async (src, dest, options) => {
 	// Set the size of the browser viewport to match
 	// the computed dimensions of the SVG
 	await page.setViewport({
-		width: computedDims.w,
-		height: computedDims.h,
+		width: computedDims.w + (options.padding * 2),
+		height: computedDims.h + (options.padding * 2),
 		deviceScaleFactor: 1
 	});
 
@@ -150,11 +165,13 @@ const convertSvgToPng = async (src, dest, options) => {
 
 convertSvgToPng.DEFAULTS = {
 	defaultSvgLength: 1000,
+	backgroundColor: null,
 	omitBackground: true,
 	overwrite: false,
 	height: null,
 	width: null,
-	trim: false
+	trim: false,
+	padding: 0
 };
 
 module.exports = convertSvgToPng;

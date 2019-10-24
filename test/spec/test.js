@@ -6,6 +6,7 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const tape = require('tape');
 const size = require('image-size');
+const ImageParser = require('image-parser');
 const convert = require('../..');
 
 const SVG = path.join(__dirname, 'svg', '1.svg');
@@ -214,6 +215,57 @@ tape('Should render an invalid SVG to default size as set as defaultSvgLength op
 		test.equal(500, outDims.height, `PNG height matches options.defaultSvgLength (${outDims.height}px).`);
 		test.equal(500, outDims.width, `PNG width matches options.defaultSvgLength (${outDims.width}px).`);
 		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
+});
+
+tape('Should pad output image based on padding option.', async test => {
+	const out = path.join(TMP, '1.png');
+
+	const opts = {
+		width: 500,
+		height: 500,
+		padding: 50,
+		overwrite: true
+	};
+
+	try {
+		await convert(SVG, out, opts);
+		const outDims = size(out);
+		test.equal(500, outDims.height, `PNG height matches options.height even with padding (${outDims.height}px).`);
+		test.equal(500, outDims.width, `PNG width matches options.width even with padding (${outDims.width}px).`);
+		test.end();
+	} catch (error) {
+		test.fail('PNG not overwritten at dest.');
+	}
+});
+
+tape('Should set background color based on backgroundColor option.', async test => {
+	const out = path.join(TMP, '1.png');
+	const color = 'rgb(254,255,188)';
+
+	const opts = {
+		trim: true,
+		width: 500,
+		height: 500,
+		padding: 20,
+		overwrite: true,
+		backgroundColor: color
+	};
+
+	try {
+		await convert(SVG, out, opts);
+		const img = new ImageParser(out);
+		img.parse(error => {
+			if (error) {
+				test.fail('Error reading output image.');
+			}
+
+			const px = img.getPixel(1, 1);
+			test.equal(color, `rgb(${px.r},${px.g},${px.b})`, `Output image background color matches backgroundColor option (${color}).`);
+			test.end();
+		});
 	} catch (error) {
 		test.fail('PNG not overwritten at dest.');
 	}

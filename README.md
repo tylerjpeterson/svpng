@@ -9,7 +9,9 @@ For this reason, it is often necessary to pass only either a height or width val
 
 The module optionally trims the SVG to its path bounds by defining a viewbox dynamically based on the SVG's bounding box, removing the whitespace around the SVG.
 
-The generated PNG renders with transparency by default. This can be disabled with the `opaque` option.
+The output image can also have padding applied via the `padding` option. This reduces the size of the rendered SVG within the generated output image so that the dimensions match the desired width and height, inclusive of padding.
+
+The generated PNG renders with transparency by default. This can be disabled with the `opaque` option, or by setting the `backgroundColor` option to any valid CSS color declaration.
 
 
 ## Installation
@@ -31,25 +33,45 @@ As a module:
 ```js
 const convert = require('svpng');
 
-await convert('image.svg', 'image.png', {width: 1200, trim: true});
+await convert('image.svg', 'image.png', {
+    width: 1200, 
+    trim: true
+});
+
+await convert('image.svg', 'image.png', {
+    backgroundColor: 'rgba(245,255,100,0.5)',
+    overwrite: true,
+    padding: 20,
+    height: 500,
+    trim: true
+});
 ```
 
 As a command line utility:
 
 ```shell
-$ svpng -t -w 1200 image.svg image.png
+$ svpng --trim --width 1200 image.svg image.png
 PNG written to "image.png" in 0.358359246s
+
+$ svpng -t -h 500 -p 20 -y -b "rgba(245,255,100,0.5)" image.svg image.png
+PNG written to "image.png" in 0.428329412s
+
+$ svpng --trim --height 500 --padding 20 --overwrite --backgroundColor "rgba(245,255,100,0.5)" image.svg image.png
+PNG written to "image.png" in 0.458329244s
+
 
 $ svpng -H
 
 Usage: svpng [options] <source> <output>
 
-Converts an SVG to a PNG
+Converts SVGs to PNGs
 
 Options:
   -V, --version                    output the version number
   -h, --height <number>            set the height of the output image
   -w, --width <number>             set the width of the output image
+  -p, --padding <number>           set the amount of padding around output image (default: 0)
+  -b, --backgroundColor <color>    set the background color of the output image as any valid CSS color
   -f, --defaultSvgLength <number>  width and height to render output if SVG dimensions are invalid (default: 1000)
   -y, --overwrite                  overwrite output file if exists (default: false)
   -t, --trim                       trim the output image to the bounds of the SVG (default: false)

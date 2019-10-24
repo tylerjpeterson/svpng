@@ -12,6 +12,8 @@ program
 	.helpOption('-H, --help', 'output usage information')
 	.option('-h, --height <number>', 'set the height of the output image')
 	.option('-w, --width <number>', 'set the width of the output image')
+	.option('-p, --padding <number>', 'set the amount of padding around output image', 0)
+	.option('-b, --backgroundColor <color>', 'set the background color of the output image as any valid CSS color')
 	.option('-f, --defaultSvgLength <number>', 'width and height to render output if SVG dimensions are invalid', convert.DEFAULTS.defaultSvgLength)
 	.option('-y, --overwrite', 'overwrite output file if exists', false)
 	.option('-t, --trim', 'trim the output image to the bounds of the SVG', false)
@@ -21,8 +23,10 @@ program
 
 		const options = {
 			defaultSvgLength: program.defaultSvgLength,
+			backgroundColor: program.backgroundColor,
 			omitBackground: !program.opaque,
 			overwrite: program.overwrite,
+			padding: program.padding,
 			height: program.height,
 			width: program.width,
 			trim: program.trim
