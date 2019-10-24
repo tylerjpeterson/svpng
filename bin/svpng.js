@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+'use strict';
+
+const program = require('commander');
+const pkg = require('../package.json');
+const convert = require('..');
+
+program
+	.version(pkg.version)
+	.description(pkg.description)
+	.arguments('<source> <output>')
+	.helpOption('-H, --help', 'output usage information')
+	.option('-h, --height <number>', 'set the height of the output image')
+	.option('-w, --width <number>', 'set the width of the output image')
+	.option('-f, --defaultSvgLength <number>', 'width and height to render output if SVG dimensions are invalid', convert.DEFAULTS.defaultSvgLength)
+	.option('-y, --overwrite', 'overwrite output file if exists', false)
+	.option('-t, --trim', 'trim the output image to the bounds of the SVG', false)
+	.option('-o, --opaque', 'save the output image with an opaque background', false)
+	.action(async (source, dest) => {
+		const hrstart = process.hrtime();
+
+		const options = {
+			defaultSvgLength: program.defaultSvgLength,
+			omitBackground: !program.opaque,
+			overwrite: program.overwrite,
+			height: program.height,
+			width: program.width,
+			trim: program.trim
+		};
+
+		try {
+			await convert(source, dest, options);
+		} catch (err) {
+			console.error(err.message || err);
+		}
+
+		console.log(`PNG written to "${dest}" in ${process.hrtime(hrstart)[1] / 1000000000}s`);
+	});
+
+if (process.argv.slice(2).length === 0) {
+	program.outputHelp();
+	process.exit();
+}
+
+program.parse(process.argv);
