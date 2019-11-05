@@ -35,7 +35,7 @@ program
 		try {
 			await convert(source, dest, options);
 		} catch (error) {
-			console.error(error);
+			console.error(error.message || error);
 			process.exit(1);
 		}
 
