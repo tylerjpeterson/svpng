@@ -39,7 +39,8 @@ program
 			process.exit(1);
 		}
 
-		console.log(`PNG written to "${dest}" in ${process.hrtime(hrstart)[1] / 1000000000}s`);
+		const hrend = process.hrtime(hrstart);
+		console.log(`PNG written to "${dest}" in ${(hrend[0] + (hrend[1] / 1e9)).toFixed(4)}s`);
 	});
 
 if (process.argv.slice(2).length === 0) {
