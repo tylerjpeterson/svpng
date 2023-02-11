@@ -27,7 +27,7 @@
     "nyc": "^14.1.1",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3",
-    "xo": "^0.25.3"
+    "xo": "^0.53.1"
   },
   "bugs": {
     "url": "https://github.com/tylerjpeterson/svpng/issues"
